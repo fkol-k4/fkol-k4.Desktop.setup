@@ -1,0 +1,166 @@
+#!/bin/bash
+
+#   file: fkol-k4.10.mint.22.1.essential
+#   type: Bash script
+#   Purpose: Installs essential packages on Linux Mint 22.1 Victoria
+
+#   Copyright (C) 2023  fkol k4, "fkolyvas at gmail dot com"
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+#	Global variables & aliases
+bold=$(tput bold)
+normal=$(tput sgr0)
+pkg.install="sudo apt-get --yes --quiet install --no-install-recommends"
+
+function headers_n_modules() {
+    # Install kernel (headers modules & dependencies)
+    message="$bold
+    Installing kernel modules...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    array=(
+    linux-generic linux-image-generic linux-headers-generic
+    build-essential
+    )
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function dev_utilities() {
+    # Development useful utilities
+    message="$bold
+    Installing Development tools ...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    array=(
+        build-essential cpulimit debootstrap dialog dkms fakeroot
+        genisoimage kernel-wedge
+        libncurses5 libncurses5-dev libncurses6
+        locate makedumpfile pastebinit preload
+        squashfs-tools syslinux tree zenity
+        zram-tools zram-config
+    )
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function deb_management_tools() {
+    # .deb management tools
+    message="$bold
+    Installing .deb package management tools ...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    array=(
+        app-install-data
+        apt-build apt-file apt-utils
+        deborphan gdebi synaptic
+        )
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function download_managers() {
+    # Download & sync managers
+    message="$bold
+    Installing download managers ...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    array=(
+		axel rsync zsync curl git
+		)
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function codecs_n_compression() {
+    # Codecs & compression algorithms
+    message="$bold
+    Installing Codecs & compression algorithms ...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+        array=(
+        default-jre default-mysql-client
+        lz4 lzd lziprecover lzma-alone lzop lz4json lzip lzma
+        liblz1 liblzo2-2 liblz4-1 liblz4-tool liblzf1 liblzma5
+        )
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function code_n_text() {
+    # Installing code editors
+    message="$bold
+    Installing Code & Text editors ...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    array=(
+        nano vim vim-python-jedi
+        mousepad
+        bluefish bluefish-plugins
+        geany geany-plugins
+        idle idle3
+        meld
+        )
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function translation_tools() {
+    # Installing code editors
+    message="$bold
+    Installing Translation Toola ...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    array=(
+        poedit potool translate-toolkit
+        )
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function info_n_recovery() {
+    # Sys_info, recovery etc.
+    message="07. Installing System_info, recovery tools etc..."
+    clear; echo -e "$message"; sleep 3
+    array=(
+        fancontrol lm-sensors
+        foremost gddrescue
+        gparted testdisk
+        gsmartcontrol hddtemp
+        htop iotop lshw lshw-gtk lsof lsscsi
+        mc
+        )
+    $pkg.install ${array[@]}
+    sync; sleep 1; sync
+    # Enable sensors
+    sudo sensors-detect --auto # new way
+    #yes | sudo sensors-detect # old way
+    sync; sleep 1; sync
+}
+
+function main(){
+    headers_n_modules
+    dev_utilities
+    deb_management_tools
+    download_managers
+    codecs_n_compression
+    code_n_text
+    translation_tools
+    info_n_recovery
+    sync; sleep 1; sync
+}
+
+main"$@"

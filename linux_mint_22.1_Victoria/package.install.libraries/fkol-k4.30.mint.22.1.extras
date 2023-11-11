@@ -1,0 +1,205 @@
+#!/bin/bash
+
+#   file: 30.mint.22.1.extras
+#   type: Bash script
+#   Purpose: Installs extra packages on Linux Mint 22.1 Victoria
+
+#   Copyright (C) 2016  fkol k4, "fkolyvas at gmail dot com"
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+#	Global variables & aliases
+bold=$(tput bold)
+normal=$(tput sgr0)
+pkg.install="sudo apt-get --yes --quiet install --no-install-recommends"
+pkg.install-gdebi="sudo gdebi --non-interactive"
+
+function install_stremio() {
+    # install Stremio from Web
+    message="$bold
+    Installing Stremio media player...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    cd /tmp/
+    wget "https://dl.strem.io/shell-linux/v4.4.164/Stremio_v4.4.164.deb"
+    sync; sleep 1; sync
+    $pkg.install-gdebi Stremio_*.deb
+    sync; sleep 1; sync
+    rm -rf Stremio_*.deb
+    cd "$HOME"
+}
+
+function install_freetube() {
+	# Install Freetube from web
+    message="$bold
+    Installing FreeTube media player...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    cd /tmp/
+    wget "https://github.com/FreeTubeApp/FreeTube/releases/download/v0.19.1-beta/freetube_0.19.1_amd64.deb"
+    sync; sleep 1; sync
+    $pkg.install-gdebi freetube_*.deb
+    sync; sleep 1; sync
+    rm -rf freetube_*.deb
+    cd "$HOME"
+}
+
+function install_raspberry_pi_imager(){
+	# 1. Installing Raspberry Pi Imager
+    message="$bold
+    Installing FreeTube media player...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+	$pkg.install rpi-imager
+	sync; sleep 1; sync
+    cd "$HOME"
+}
+
+function install_oracle_virtualbox() {
+	# Installing Oracle Virtualbox
+	message="$bold
+    Installing Oracle Virtualbox...
+    $normal"
+    clear; echo -e "$message"; sleep 2
+    # Add VirtualBox deb repository
+    echo -e "# Home: https://www.virtualbox.org/wiki/Linux_Downloads
+# GetKey: wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg
+deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian jammy contrib
+" | sudo tee /etc/apt/sources.list.d/virtualbox-nonfree.list
+	# Installing repository key
+	wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg
+    # Installing Virtualbox
+    sudo apt-get --quiet update
+    sudo apt-get --yes --quiet install virtualbox-6.1
+	sync; sleep 1; sync
+	# Add $USER to virtualbox users group
+    sudo gpasswd -a "$USER" vboxusers	# adds $USER to group
+    # Download & install extensions pack
+    firefox -private -new-window "https://download.virtualbox.org/virtualbox/6.1.48/Oracle_VM_VirtualBox_Extension_Pack-6.1.48.vbox-extpack"	# installs extensions pack
+    cd "$HOME"
+}
+
+function compile_coreutils_viewer() {
+    message='We are now going to compile CoreUtils Viewer...'
+    clear; echo "$message"; echo; sleep 3
+    # linux tool to show progress for cp, rm, dd, ...
+    package_repo="https://github.com/Xfennec/cv"
+    function compile_cv() {
+        # compile coreutils viewer
+        make clean
+        make
+        sudo make install
+        make clean
+    }
+    # install
+    mkdir -p "$HOME/.local/src"
+    cd "$HOME/.local/src/"
+    if [[ -d "$HOME/.local/src/cv" ]]; then
+        cd cv/
+        git pull
+    else
+        git clone "$package_repo"
+        cd cv/
+    fi
+    compile_cv
+    sync; cd $HOME
+}
+
+function install_live_streamer() {
+    message='We are now going to compile LiveStreamer...'
+    clear; echo "$message"; echo; sleep 3
+    # livestreamer: http://livestreamer.tanuki.se/en/latest/
+    dependencies=(
+        python
+        python-setuptools
+        python-requests
+        )
+    sudo apt-get --yes install ${dependencies[@]}; sync
+    # 	compile livestreamer
+    mkdir -p "$HOME/.local/src"
+    cd "$HOME/.local/src/"
+    if [[ -d "$HOME/.local/src/livestreamer" ]]; then
+        cd livestreamer/
+        git pull
+    else
+        git clone "git://github.com/chrippa/livestreamer.git"
+        cd livestreamer/
+    fi
+    sudo python setup.py install
+    sync; cd $HOME
+}
+
+function choose_package() {
+    # Choose extra packages
+    echo "You can choose the package you want to install from the list below"
+    echo "by entering the number next to it, or type anything else to exit."
+    echo
+    echo "1. Stremio Media Player"
+    echo "2. Freetube Media Player"
+    echo "3. Raspberry Pi Imager"
+    echo "4. Oracle Virtualbox"
+    echo "5. CoreUtils Viewer"
+    echo "6. Live Streamer"
+    echo "0. Exit (default)"
+    
+    echo
+    read -p "Enter your choice: " extra_package
+    # Execute action
+    if [[ "$extra_package" == "1" ]]; then
+        install_stremio
+    elif [[ "$extra_package" == "2" ]]; then
+        install_freetube
+    elif [[ "$extra_package" == "3" ]]; then
+        install_raspberry_pi_imager
+    elif [[ "$extra_package" == "4" ]]; then
+        install_oracle_virtualbox
+    elif [[ "$extra_package" == "5" ]]; then
+        compile_coreutils_viewer
+    elif [[ "$extra_package" == "5" ]]; then
+        install_live_streamer
+    else
+        echo "
+        Ok, exiting...
+        "; sleep 2
+        return # exits function
+        # this is for exiting the entire script
+        # kill -INT $$
+    fi
+    choose_again
+}
+
+function choose_again() {
+    # Choose again after 
+    clear
+    message='Do you want to install anything else? (Y/n): '
+    echo
+    read -p "$message" answer
+    if [[ "$answer" == "Y" ]] || [[ "$answer" == "y" ]]; then
+        echo "Ok, continuing..."; sleep 2
+        clear
+        choose_package
+    else
+        echo; echo "Ok, exiting..."; echo; sleep 2
+    fi
+}
+
+function main() {
+    clear
+    echo "We can install some extra packages...
+    "; echo
+    choose_package
+}
+
+main "$@"

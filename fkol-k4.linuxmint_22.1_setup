@@ -1,0 +1,105 @@
+#!/bin/bash
+
+#   file: linuxmint.22.1_setup
+#   type: Bash script
+#   action: Sets up most of the distro
+
+#   Copyright (C) 2023  fkol k4, "fkolyvas at gmail dot com".
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+# 	Setting up global variables & working directory
+clear
+
+#	Global variables & aliases
+bold=$(tput bold)
+normal=$(tput sgr0)
+workingdirectory="/tmp/SetupDirectory"
+mkdir -p "$workingdirectory"
+
+function install_essential_packages(){
+	# Installing essential packages
+	start_message="$bold
+	Making sure that essential packages (git rsync notify-send) are installed. Please wait...
+	$normal"
+	clear; echo "$start_message"; sleep 2
+	sudo apt-get --yes --quiet install git rsync notify-send
+	sync; sleep 1; sync
+	end_message="$bold
+	OK! All essential packages have been installed. Continuing...
+	$normal"
+	echo "$end_message"; sleep 2
+}
+
+function clone_setup_data(){
+	# Cloning installation data
+	sync; sleep 1; sync
+	start_message="$bold
+    Cloning installation data, please wait...
+	$normal"
+    clear; echo "$start_message"; sleep 2
+    cd $workingdirectory
+    git clone https://github.com/fkol-k4/fkol-k4_Desktop_setup.git
+    sync; sleep 1; sync
+}
+
+# 	Setting up notification icon
+notificationicon="$workingdirectory/fkol-k4_Desktop_setup/linux_mint_22.1_Victoria/SystemFiles/usr/share/icons/fkol-k4/fkol-k4.donkey.svg"
+
+function call_install_scripts(){
+	# Calling installation scripts
+	cd "$workingdirectory/fkol-k4_Desktop_setup/linux_mint_22.1_Victoria/package.install.libraries/"
+	notify-senf --icon="$notificationicon" --t 4000 "	Calling essential packages install script..."
+	./fkol-k4.10.mint.22.1.essential
+	notify-senf --icon="$notificationicon" --t 4000 "	Essential packages install script finished. Continuing setup..."
+	sync; sleep 1; sync
+	notify-senf --icon="$notificationicon" --t 4000 "	Calling common packages install script..."
+	./fkol-k4.20.mint.22.1.common
+	notify-senf --icon="$notificationicon" --t 4000 "	Common packages install script finished. Continuing setup..."
+	sync; sleep 1; sync
+	notify-senf --icon="$notificationicon" --t 4000 "	Calling extra packages install script..."
+	./fkol-k4.20.mint.22.1.extras
+	notify-senf --icon="$notificationicon" --t 4000 "	Extra packages install script finished. Continuing setup..."
+	sync; sleep 1; sync
+    cd $workingdirectory
+}
+
+function copy_systemfiles(){
+	# Copying System Files from Git repo to System
+	start_message="$bold
+Copying System Files from Git repo to System, please wait...
+	$normal"
+	notify-senf --icon="$notificationicon" --t 4000 "	Copying System Files from Git repo to System..."
+	clear; echo "$start_message"; sleep 2
+	sudo rsync -avz $workingdirectory/fkol-k4_Desktop_setup/linux_mint_22.1_Victoria/SystemFiles/* /
+	sync; sleep 1; sync
+	sudo update-grub
+	notify-senf --icon="$notificationicon" --t 4000 "	 Files from Git repo have being copied to System. Continuing setup..."
+	end_message="$bold
+	Files from Git repo have being copied to System. Continuing setup...
+	$normal"
+	clear; echo "$end_message"; sleep 2
+	sync; sleep 1; sync
+}
+
+function main() {
+    # main function
+    install_essential_packages
+    clone_setup_data
+    call_install_scripts
+    copy_systemfiles
+}
+
+main"$@"
