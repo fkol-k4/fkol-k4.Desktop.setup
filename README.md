@@ -1,2 +1,3 @@
-# fkol-k4.Xubuntu
-This is a repository for Xubuntu installs.
+# fkol-k4.Desktop_setup
+
+This is a github repository setting up my desktop computer using a Linux Distribution.
