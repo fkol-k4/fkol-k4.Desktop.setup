@@ -21,129 +21,185 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 #	Global variables & aliases
-bold=$(tput bold)
-normal=$(tput sgr0)
-pkg.install="sudo apt-get --yes --quiet install --no-install-recommends"
+BOLD_LETTERS=$(tput bold)
+NORMAL_LETTERS=$(tput sgr0)
 
 function headers_n_modules() {
     # Install kernel (headers modules & dependencies)
-    message="$bold
+    msg="$BOLD_LETTERS
     Installing kernel modules...
-    $normal"
-    clear; echo -e "$message"; sleep 2
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 2
     array=(
-    linux-generic linux-image-generic linux-headers-generic
-    build-essential
+		linux-generic
+		linux-image-generic
+		linux-headers-generic
+		build-essential
     )
-    $pkg.install ${array[@]}
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
 }
 
 function dev_utilities() {
     # Development useful utilities
-    message="$bold
+    msg="$BOLD_LETTERS
     Installing Development tools ...
-    $normal"
-    clear; echo -e "$message"; sleep 2
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 2
     array=(
-        build-essential cpulimit debootstrap dialog dkms fakeroot
-        genisoimage kernel-wedge
-        libncurses5 libncurses5-dev libncurses6
-        locate makedumpfile pastebinit preload
-        squashfs-tools syslinux tree zenity
-        zram-tools zram-config
+		build-essential
+		cpulimit
+		debootstrap
+		dialog
+		dkms
+		fakeroot
+		genisoimage
+		kernel-wedge
+		libncurses5
+		libncurses5-dev
+		libncurses6
+		locate
+		makedumpfile
+		pastebinit
+		preload
+		progress
+		squashfs-tools
+		syslinux
+		tree
+		zenity
+		zram-tools
+		zram-config
     )
-    $pkg.install ${array[@]}
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
 }
 
 function deb_management_tools() {
     # .deb management tools
-    message="$bold
+    msg="$BOLD_LETTERS
     Installing .deb package management tools ...
-    $normal"
-    clear; echo -e "$message"; sleep 2
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 2
     array=(
-        app-install-data
-        apt-build apt-file apt-utils
-        deborphan gdebi synaptic
-        )
-    $pkg.install ${array[@]}
+		app-install-data
+		apt-build
+		apt-file
+		apt-utils
+		deborphan
+		gdebi
+		synaptic
+    )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
 }
 
 function download_managers() {
     # Download & sync managers
-    message="$bold
+    msg="$BOLD_LETTERS
     Installing download managers ...
-    $normal"
-    clear; echo -e "$message"; sleep 2
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 2
     array=(
-		axel rsync zsync curl git
-		)
-    $pkg.install ${array[@]}
+		axel
+		rsync
+		zsync
+		curl
+		git
+	)
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
 }
 
 function codecs_n_compression() {
     # Codecs & compression algorithms
-    message="$bold
+    msg="$BOLD_LETTERS
     Installing Codecs & compression algorithms ...
-    $normal"
-    clear; echo -e "$message"; sleep 2
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 2
         array=(
-        default-jre default-mysql-client
-        lz4 lzd lziprecover lzma-alone lzop lz4json lzip lzma
-        liblz1 liblzo2-2 liblz4-1 liblz4-tool liblzf1 liblzma5
-        )
-    $pkg.install ${array[@]}
+		default-jre
+		default-mysql-client
+		lz4
+		lzd
+		lziprecover
+		lzma-alone
+		lzop
+		lz4json
+		lzip
+		lzma
+		liblz1
+		liblzo2-2
+		liblz4-1
+		liblz4-tool
+		liblzf1
+		liblzma5
+    )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
 }
 
 function code_n_text() {
     # Installing code editors
-    message="$bold
+    msg="$BOLD_LETTERS
     Installing Code & Text editors ...
-    $normal"
-    clear; echo -e "$message"; sleep 2
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 2
     array=(
-        nano vim vim-python-jedi
-        mousepad
-        bluefish bluefish-plugins
-        geany geany-plugins
-        idle idle3
-        meld
-        )
-    $pkg.install ${array[@]}
+		nano
+		vim
+		vim-python-jedi
+		mousepad
+		bluefish
+		bluefish-plugins
+		geany
+		geany-plugins
+		idle
+		idle3
+		meld
+    )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
 }
 
 function translation_tools() {
     # Installing code editors
-    message="$bold
+    msg="$BOLD_LETTERS
     Installing Translation Toola ...
-    $normal"
-    clear; echo -e "$message"; sleep 2
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 2
     array=(
-        poedit potool translate-toolkit
-        )
-    $pkg.install ${array[@]}
+		poedit
+		potool
+		translate-toolkit
+    )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
 }
 
 function info_n_recovery() {
     # Sys_info, recovery etc.
-    message="07. Installing System_info, recovery tools etc..."
-    clear; echo -e "$message"; sleep 3
+    msg="$BOLD_LETTERS
+    Installing System_info, recovery tools etc...
+    $NORMAL_LETTERS"
+    clear; echo -e "$msg"; sleep 3
     array=(
-        fancontrol lm-sensors
-        foremost gddrescue
-        gparted testdisk
-        gsmartcontrol hddtemp
-        htop iotop lshw lshw-gtk lsof lsscsi
-        mc
-        )
-    $pkg.install ${array[@]}
+		fancontrol
+		lm-sensors
+		foremost
+		gddrescue
+		gparted
+		testdisk
+		gsmartcontrol
+		hddtemp
+		htop
+		iotop
+		lshw
+		lshw-gtk
+		lsof
+		lsscsi
+		mc
+    )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
     # Enable sensors
     sudo sensors-detect --auto # new way

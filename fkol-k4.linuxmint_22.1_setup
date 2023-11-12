@@ -20,82 +20,96 @@
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# 	Setting up global variables & working directory
-clear
+#	Global variables & command aliases
+BOLD_LETTERS=$(tput bold)
+NORMAL_LETTERS=$(tput sgr0)
+WORKING_DIR="/tmp/SetupDirectory"
+GIT_REPO="https://github.com/fkol-k4/fkol-k4_Desktop_setup.git"
+REPO_DIR=`echo "$GIT_REPO" | awk -F'[/.]' '{print $6}'`
+NOTIFICATION_ICON="$WORKING_DIR/$REPO_DIR/linux_mint_22.1_Victoria/SystemFiles/usr/share/icons/fkol-k4/fkol-k4.donkey.mint_green.circle.svg"
 
-#	Global variables & aliases
-bold=$(tput bold)
-normal=$(tput sgr0)
-workingdirectory="/tmp/SetupDirectory"
-mkdir -p "$workingdirectory"
+function setup_working_directory(){
+	clear
+	mkdir -p "$WORKING_DIR"       # Create working directory
+	sudo rm -rf "$WORKING_DIR"/*    # Cleaning up just in case
+}
 
 function install_essential_packages(){
-	# Installing essential packages
-	start_message="$bold
+    # Set variables
+	msg1="$BOLD_LETTERS
 	Making sure that essential packages (git rsync notify-send) are installed. Please wait...
-	$normal"
-	clear; echo "$start_message"; sleep 2
-	sudo apt-get --yes --quiet install git rsync notify-send
-	sync; sleep 1; sync
-	end_message="$bold
+	$NORMAL_LETTERS"
+	msg2="$BOLD_LETTERS
 	OK! All essential packages have been installed. Continuing...
-	$normal"
-	echo "$end_message"; sleep 2
+	$NORMAL_LETTERS"
+	# Install essential packages
+	clear
+    echo "$msg1"; sleep 2
+	sudo apt-get --yes --quiet install git rsync notification-daemon
+	sync; sleep 1; sync
+	echo "$msg2"; sleep 2
 }
 
 function clone_setup_data(){
-	# Cloning installation data
-	sync; sleep 1; sync
-	start_message="$bold
+    # Set variables
+	msg1="$BOLD_LETTERS
     Cloning installation data, please wait...
-	$normal"
-    clear; echo "$start_message"; sleep 2
-    cd $workingdirectory
-    git clone https://github.com/fkol-k4/fkol-k4_Desktop_setup.git
+	$NORMAL_LETTERS"
+	msg2="$BOLD_LETTERS
+	OK! Installation data have been cloned. Continuing...
+	$NORMAL_LETTERS"
+    clear
+    cd "$WORKING_DIR"/
+    echo "$msg1"; sleep 2
+	# Cloning installation data
+    git clone "$GIT_REPO"
     sync; sleep 1; sync
+	echo "$msg2"; sleep 2
 }
 
-# 	Setting up notification icon
-notificationicon="$workingdirectory/fkol-k4_Desktop_setup/linux_mint_22.1_Victoria/SystemFiles/usr/share/icons/fkol-k4/fkol-k4.donkey.svg"
-
 function call_install_scripts(){
-	# Calling installation scripts
-	cd "$workingdirectory/fkol-k4_Desktop_setup/linux_mint_22.1_Victoria/package.install.libraries/"
-	notify-senf --icon="$notificationicon" --t 4000 "	Calling essential packages install script..."
-	./fkol-k4.10.mint.22.1.essential
-	notify-senf --icon="$notificationicon" --t 4000 "	Essential packages install script finished. Continuing setup..."
-	sync; sleep 1; sync
-	notify-senf --icon="$notificationicon" --t 4000 "	Calling common packages install script..."
-	./fkol-k4.20.mint.22.1.common
-	notify-senf --icon="$notificationicon" --t 4000 "	Common packages install script finished. Continuing setup..."
-	sync; sleep 1; sync
-	notify-senf --icon="$notificationicon" --t 4000 "	Calling extra packages install script..."
-	./fkol-k4.20.mint.22.1.extras
-	notify-senf --icon="$notificationicon" --t 4000 "	Extra packages install script finished. Continuing setup..."
-	sync; sleep 1; sync
-    cd $workingdirectory
+    # Set variables
+	libraries_dir="linux_mint_22.1_Victoria/package.install.libraries"
+	scriptarray=(`ls "$WORKING_DIR/$REPO_DIR/$libraries_dir/*.sh" | sort`)
+	# cd into installation libraries directory
+	cd "$WORKING_DIR/$REPO_DIR/libraries_dir"/
+    # Call installation library scripts
+    for installscript in ${scriptarray[@]}
+    do
+		clear
+		notify-send --icon="$NOTIFICATION_ICON" -t 4000 "Calling install script $installscript ..."
+		echo "Calling install script $BOLD_LETTERS $installscript $NORMAL_LETTERS ..."
+		/bin/bash "$installscript"
+		sync; sleep 1; sync
+		notify-send --icon="$NOTIFICATION_ICON" -t 4000 "Install script $installscript has finished..."
+		echo "Install script $BOLD_LETTERS $installscript $NORMAL_LETTERS has finished..."
+	done
+	notify-send --icon="$NOTIFICATION_ICON" -t 4000 "All install scripts have finished. Continuing..."
+	echo "$BOLD_LETTERS
+	All install scripts have finished. Continuing...
+	$NORMAL_LETTERS "
+    cd $WORKING_DIR/
 }
 
 function copy_systemfiles(){
 	# Copying System Files from Git repo to System
-	start_message="$bold
-Copying System Files from Git repo to System, please wait...
-	$normal"
-	notify-senf --icon="$notificationicon" --t 4000 "	Copying System Files from Git repo to System..."
-	clear; echo "$start_message"; sleep 2
-	sudo rsync -avz $workingdirectory/fkol-k4_Desktop_setup/linux_mint_22.1_Victoria/SystemFiles/* /
+	filesdir="linux_mint_22.1_Victoria/SystemFiles"
+	msg1="$BOLD_LETTERS
+    Copying System Files from Git repo to System, please wait...
+	$NORMAL_LETTERS"
+	msg2="$BOLD_LETTERS
+	Files from Git repo have being copied to System. Continuing setup...
+	$NORMAL_LETTERS"
+	clear; echo "$msg1"; notify-send --icon="$NOTIFICATION_ICON" -t 4000 "$msg1"
+	sudo rsync -avz "$WORKING_DIR/$REPO_DIR/$filesdir/" /
 	sync; sleep 1; sync
 	sudo update-grub
-	notify-senf --icon="$notificationicon" --t 4000 "	 Files from Git repo have being copied to System. Continuing setup..."
-	end_message="$bold
-	Files from Git repo have being copied to System. Continuing setup...
-	$normal"
-	clear; echo "$end_message"; sleep 2
+	clear; echo "$msg2"; notify-send --icon="$NOTIFICATION_ICON" -t 4000 "$msg2"
 	sync; sleep 1; sync
 }
 
 function main() {
-    # main function
+	setup_working_directory
     install_essential_packages
     clone_setup_data
     call_install_scripts
