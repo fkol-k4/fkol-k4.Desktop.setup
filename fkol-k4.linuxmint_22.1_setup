@@ -26,7 +26,11 @@ NORMAL_LETTERS=$(tput sgr0)
 WORKING_DIR="/tmp/SetupDirectory"
 GIT_REPO="https://github.com/fkol-k4/fkol-k4_Desktop_setup.git"
 REPO_DIR=`echo "$GIT_REPO" | awk -F'[/.]' '{print $6}'`
-NOTIFICATION_ICON="$WORKING_DIR/$REPO_DIR/linux_mint_22.1_Victoria/SystemFiles/usr/share/icons/fkol-k4/fkol-k4.donkey.mint_green.circle.svg"
+
+#   Create deb packages backup directory
+cd "$HOME"
+BACKUPDIR="$HOME/Deb_packages_backup"
+mkdir -p "$BACKUPDIR"
 
 function setup_working_directory(){
 	clear
@@ -34,86 +38,437 @@ function setup_working_directory(){
 	sudo rm -rf "$WORKING_DIR"/*    # Cleaning up just in case
 }
 
-function install_essential_packages(){
+function install_startup_packages(){
     # Set variables
-	msg1="$BOLD_LETTERS
-	Making sure that essential packages (git rsync notify-send) are installed. Please wait...
-	$NORMAL_LETTERS"
-	msg2="$BOLD_LETTERS
-	OK! All essential packages have been installed. Continuing...
+    msgbody="Making sure that essential packages (git rsync notify-send) are installed. Please wait..."
+	msg="$BOLD_LETTERS
+	$msgbody
 	$NORMAL_LETTERS"
 	# Install essential packages
 	clear
-    echo "$msg1"; sleep 2
-	sudo apt-get --yes --quiet install git rsync notification-daemon
+    echo "$msg"; sleep 2
+	sudo apt-get --yes --quiet install git rsync notification-daemon gdebi
 	sync; sleep 1; sync
-	echo "$msg2"; sleep 2
+	msgbody="OK! All essential packages have been installed. Continuing..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
 }
 
 function clone_setup_data(){
     # Set variables
-	msg1="$BOLD_LETTERS
-    Cloning installation data, please wait...
-	$NORMAL_LETTERS"
-	msg2="$BOLD_LETTERS
-	OK! Installation data have been cloned. Continuing...
+    msgbody="Cloning installation data, please wait..."
+	msg="$BOLD_LETTERS
+    $msgbody
 	$NORMAL_LETTERS"
     clear
     cd "$WORKING_DIR"/
-    echo "$msg1"; sleep 2
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
 	# Cloning installation data
     git clone "$GIT_REPO"
     sync; sleep 1; sync
-	echo "$msg2"; sleep 2
-}
-
-function call_install_scripts(){
-    # Set variables
-	libraries_dir="linux_mint_22.1_Victoria/package.install.libraries"
-	scriptarray=(`ls "$WORKING_DIR/$REPO_DIR/$libraries_dir/*.sh" | sort`)
-	# cd into installation libraries directory
-	cd "$WORKING_DIR/$REPO_DIR/libraries_dir"/
-    # Call installation library scripts
-    for installscript in ${scriptarray[@]}
-    do
-		clear
-		notify-send --icon="$NOTIFICATION_ICON" -t 4000 "Calling install script $installscript ..."
-		echo "Calling install script $BOLD_LETTERS $installscript $NORMAL_LETTERS ..."
-		/bin/bash "$installscript"
-		sync; sleep 1; sync
-		notify-send --icon="$NOTIFICATION_ICON" -t 4000 "Install script $installscript has finished..."
-		echo "Install script $BOLD_LETTERS $installscript $NORMAL_LETTERS has finished..."
-	done
-	notify-send --icon="$NOTIFICATION_ICON" -t 4000 "All install scripts have finished. Continuing..."
-	echo "$BOLD_LETTERS
-	All install scripts have finished. Continuing...
-	$NORMAL_LETTERS "
-    cd $WORKING_DIR/
+	msgbody="OK! Installation data have been cloned. Continuing..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
 }
 
 function copy_systemfiles(){
 	# Copying System Files from Git repo to System
 	filesdir="linux_mint_22.1_Victoria/SystemFiles"
-	msg1="$BOLD_LETTERS
-    Copying System Files from Git repo to System, please wait...
+	msgbody="Copying System Files from Git repo to System, please wait..."
+	msg="$BOLD_LETTERS
+	$msgbody
 	$NORMAL_LETTERS"
-	msg2="$BOLD_LETTERS
-	Files from Git repo have being copied to System. Continuing setup...
-	$NORMAL_LETTERS"
-	clear; echo "$msg1"; notify-send --icon="$NOTIFICATION_ICON" -t 4000 "$msg1"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
 	sudo rsync -avz "$WORKING_DIR/$REPO_DIR/$filesdir/" /
 	sync; sleep 1; sync
 	sudo update-grub
-	clear; echo "$msg2"; notify-send --icon="$NOTIFICATION_ICON" -t 4000 "$msg2"
+	msgbody="Files from Git repo have being copied to System. Continuing setup..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
 	sync; sleep 1; sync
+}
+
+function install_essential_packages() {
+    # Set variables
+    msgbody="Installing essential packages..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+        axel
+		bluefish
+		bluefish-plugins
+		build-essential
+		cpulimit
+        curl
+		debootstrap
+		default-jre
+		default-mysql-client
+        deluge
+		dialog
+		dkms
+		fakeroot
+		fancontrol
+		foremost
+		gddrescue
+		geany
+		geany-plugins
+		genisoimage
+        git
+		gparted
+		gsmartcontrol
+		hddtemp
+		htop
+		idle
+		idle3
+		iotop
+		kernel-wedge
+		liblz1
+		liblz4-1
+		liblz4-tool
+		liblzf1
+		liblzma5
+		liblzo2-2
+		libncurses5
+		libncurses5-dev
+		libncurses6
+		linux-generic
+		linux-headers-generic
+		linux-image-generic
+		lm-sensors
+		locate
+		lshw
+		lshw-gtk
+		lsof
+		lsscsi
+		lz4
+		lz4json
+		lzd
+		lzip
+		lziprecover
+		lzma
+		lzma-alone
+		lzop
+		makedumpfile
+		mc
+		meld
+		mousepad
+		nano
+		pastebinit
+		poedit
+		potool
+		preload
+		progress
+        rsync
+		squashfs-tools
+		syslinux
+		testdisk
+		translate-toolkit
+		tree
+		vim
+		vim-python-jedi
+		zenity
+		zram-config
+		zram-tools
+        zsync
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
+    sync; sleep 1; sync
+    # Enable sensors
+    sudo sensors-detect --auto
+    # Old command for sensors detecting
+    #yes | sudo sensors-detect
+}
+
+function install_common_packages() {
+    # Set variables
+    msgbody="Installing common packages..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    # Begin installation
+    array=(
+		aspell aspell-el aspell-en aspell-fr
+		audacity
+		blender
+		brasero
+		catfish
+		clementine
+		cups-pdf
+		deluge
+		firefox
+		fontforge fontforge-extras
+		font-manager
+		fonts-dejavu fonts-dejavu-extra
+		fonts-freefont-*
+		fonts-gfs-*
+		fonts-liberation*
+		fonts-noto fonts-noto-extra
+		frei0r-plugins
+		gimp gimp-data-extras
+		gucharmap
+		handbrake
+		inkscape
+		irssi
+		kdenlive
+		keepassx
+		libreoffice libreoffice-pdfimport libreoffice-templates
+		links2
+		lynx
+		mkvtoolnix mkvtoolnix-gui
+		mp3check
+		mp3diags
+		mpv
+		myspell-el-gr
+		pidgin pidgin-plugin-pack pidgin-themes
+		pulseaudio pavucontrol
+		quodlibet quodlibet-plugins
+		rhythmbox rhythmbox-plugins
+		rpi-imager
+		seahorse
+		thunderbird
+		transcode
+		vlc
+		wireshark
+    )
+    sudo apt-get --yes --quiet install ${array[@]}
+    sync; sleep 1; sync
+}
+
+function install_stremio() {
+    # Set variables
+    pkgbackupdir="Stremio_Video_Player"
+    pkgversion="https://dl.strem.io/shell-linux/v4.4.164/Stremio_v4.4.164.deb"
+    pkgname=`echo "$pkgversion" | awk 'BEGIN { FS = "/" } ; { print $6 }'`
+	msgbody="Installing Stremio media player..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    mkdir -p "$BACKUPDIR/$pkgbackupdir"
+    cd "$BACKUPDIR/$pkgbackupdir/"
+    [[ ! -f "$pkgname" ]] && wget "$pkgversion"
+    sync; sleep 1; sync
+    sudo gdebi --non-interactive "$pkgname"
+    sync; sleep 1; sync
+    mkdir -p "$HOME/.local/share/applications" ; mv "$HOME/Desktop/*.desktop" $HOME/.local/share/applications/
+    cd "$HOME"
+}
+
+function install_freetube() {
+	# Set variables
+    pkgbackupdir="FreeTube_Video_Player"
+    pkgversion="https://github.com/FreeTubeApp/FreeTube/releases/download/v0.19.1-beta/freetube_0.19.1_amd64.deb"
+    pkgname=`echo "$pkgversion" | awk 'BEGIN { FS = "/" } ; { print $9 }'`
+    msgbody="Installing FreeTube media player..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    mkdir -p "$BACKUPDIR/$pkgbackupdir"
+    cd "$BACKUPDIR/$pkgbackupdir/"
+    [[ ! -f "$pkgname" ]] && wget "$pkgversion"
+    sync; sleep 1; sync
+    sudo gdebi --non-interactive "$pkgname"
+    sync; sleep 1; sync
+    mkdir -p "$HOME/.local/share/applications" ; mv "$HOME/Desktop/*.desktop" $HOME/.local/share/applications/
+    cd "$HOME"
+}
+
+function install_oracle_virtualbox() {
+	# Set variables
+    pkgbackupdir="Oracle_VirtualBox"
+    pkgversion="https://download.virtualbox.org/virtualbox/7.0.12/virtualbox-7.0_7.0.12-159484~Ubuntu~jammy_amd64.deb"
+    pkgname=`echo "$pkgversion" | awk 'BEGIN { FS = "/" } ; { print $6 }'`
+    extpackversion="https://download.virtualbox.org/virtualbox/6.1.48/Oracle_VM_VirtualBox_Extension_Pack-6.1.48.vbox-extpack"
+    extpackname=`echo $extpackversion | awk 'BEGIN { FS = "/" } ; { print $6 }'`
+	msgbody="Installing Oracle Virtualbox..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    mkdir -p "$BACKUPDIR/$pkgbackupdir"
+    cd "$BACKUPDIR/$pkgbackupdir/"
+    [[ ! -f "$pkgname" ]] && wget "$pkgversion"
+    [[ ! -f "$extpackname" ]] && wget "$extpackversion"
+    sync; sleep 1; sync
+    sudo gdebi --non-interactive "$pkgname"
+    sync; sleep 1; sync
+    sudo gpasswd -a "$USER" vboxusers	# adds $USER to group
+    virtualbox "$extpackname"			# Install virtualbox extension pack
+	sync; sleep 1; sync
+    mkdir -p "$HOME/.local/share/applications" ; mv "$HOME/Desktop/*.desktop" $HOME/.local/share/applications/
+    cd "$HOME"
+}
+
+function install_VariCAD() {
+    # Set variables
+    pkgbackupdir="VariCAD_for_Linux"
+    pkg1version="https://www.varicad.com/userdata/files/release/en/varicad2023-en_2.08_amd64.deb"
+    pkg2version="https://www.varicad.com/userdata/files/release/en/varicad2023-view-en_2.08_amd64.deb"
+    pkg1name=`echo "$pkg1version" | awk 'BEGIN { FS = "/" } ; { print $8 }'`
+    pkg2name=`echo "$pkg2version" | awk 'BEGIN { FS = "/" } ; { print $8 }'`
+	msgbody="Installing VariCAD for Linux..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    # Install packages
+    mkdir -p "$BACKUPDIR/$pkgbackupdir"
+    cd "$BACKUPDIR/$pkgbackupdir/"
+    [[ ! -f "$pkg1name" ]] && wget "$pkg1version"
+    [[ ! -f "$pkg2name" ]] && wget "$pkg2version"
+    sync; sleep 1; sync
+    sudo gdebi --non-interactive "$pkg1name"
+    sudo gdebi --non-interactive "$pkg2name"
+    sync; sleep 1; sync
+    mkdir -p "$HOME/.local/share/applications" ; mv "$HOME/Desktop/*.desktop" $HOME/.local/share/applications/
+    cd "$HOME"
+}
+
+function install_remarkable_editor() {
+    # Set variables
+    pkgbackupdir="Remarkable_markdown_editor"
+    pkgversion="https://remarkableapp.github.io/files/remarkable_1.87_all.deb"
+    pkgname=`echo "$pkgversion" | awk 'BEGIN { FS = "/" } ; { print $5 }'`
+    msgbody="Installing Remarkable markdown editor..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    mkdir -p "$BACKUPDIR/$pkgbackupdir"
+    cd "$BACKUPDIR/$pkgbackupdir/"
+    [[ ! -f "$pkgname" ]] && wget "$pkgversion"
+    sync; sleep 1; sync
+    sudo gdebi --non-interactive "$pkgname"
+    sync; sleep 1; sync
+    mkdir -p "$HOME/.local/share/applications" ; mv "$HOME/Desktop/*.desktop" $HOME/.local/share/applications/
+    cd "$HOME"
+}
+
+function install_haroopad_editor() {
+    # Set variables
+    pkgbackupdir="Haroopad_markdown_editor"
+    pkgversion="https://bitbucket.org/rhiokim/haroopad-download/downloads/haroopad-v0.13.1-x64.deb"
+    pkgname=`echo "$pkgversion" | awk 'BEGIN { FS = "/" } ; { print $7 }'`
+    msgbody="Installing HarooPad markdown editor..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    mkdir -p "$BACKUPDIR/$pkgbackupdir"
+    cd "$BACKUPDIR/$pkgbackupdir/"
+    [[ ! -f "$pkgname" ]] && wget "$pkgversion"
+    sync; sleep 1; sync
+    sudo gdebi --non-interactive "$pkgname"
+    sync; sleep 1; sync
+    mkdir -p "$HOME/.local/share/applications" ; mv "$HOME/Desktop/*.desktop" $HOME/.local/share/applications/
+    cd "$HOME"
+}
+
+function install_plank_dock() {
+    # Set variables
+    msgbody="Installing administration tools..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    # Begin installation
+    array=(
+		plank
+		)
+	sudo apt-get --yes --quiet install ${array[@]}
+	sync; sleep 1; sync
+    cd "$HOME"
+}
+
+function add_nopasswd_option() {
+    # Set variables
+	msgbody="Adding NOPASSWD option to $USER ..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	txtbody="
+# 	NOPASSWD option for sudo use, added by $USER
+$USER ALL=(ALL) NOPASSWD: ALL
+	"
+	# Add NOPASSWD option for $USER
+	echo "$txtbody" | sudo tee -a /etc/sudoers
+	sync; sleep 1; sync
+    cd "$HOME"
+}
+
+function choose_package() {
+    # Choose extra packages
+    echo "$BOLD_LETTERS You can choose the package you want to install from the list below $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS by entering the number next to it, or type anything else to exit. $NORMAL_LETTERS"
+    echo
+    echo "$BOLD_LETTERS 1. Stremio Media Player $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 2. Freetube Media Player $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 3. Oracle Virtualbox $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 4. VariCAD for Linux $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 5. Remarkable Markdown Editor $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 6. Haroopad Markdown Editor $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 7. Plank Dock $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 8. Add NOPASSWD option for your sudo use $NORMAL_LETTERS"
+    echo "$BOLD_LETTERS 0. Exit (default) $NORMAL_LETTERS"
+    
+    echo
+    read -p "$BOLD_LETTERS Enter your choice:  $NORMAL_LETTERS" extra_package
+    # Execute action
+    if [[ "$extra_package" == "1" ]]; then
+        install_stremio
+    elif [[ "$extra_package" == "2" ]]; then
+        install_freetube
+    elif [[ "$extra_package" == "3" ]]; then
+        install_oracle_virtualbox
+    elif [[ "$extra_package" == "4" ]]; then
+        install_VariCAD
+    elif [[ "$extra_package" == "5" ]]; then
+        install_remarkable_editor
+    elif [[ "$extra_package" == "6" ]]; then
+        install_haroopad_editor
+    elif [[ "$extra_package" == "7" ]]; then
+        install_plank_dock
+    elif [[ "$extra_package" == "8" ]]; then
+        add_nopasswd_option
+    else
+        echo "$BOLD_LETTERS 
+        Ok, exiting...
+         $NORMAL_LETTERS"; sleep 2
+        return # exits function
+        # this is for exiting the entire script
+        # kill -INT $$
+    fi
+    choose_again
+}
+
+function choose_again() {
+    # Choose again after 
+    clear
+    msg="$BOLD_LETTERS Do you want to install anything else? (Y/n):  $NORMAL_LETTERS"
+    echo
+    read -p "$msg" answer
+    if [[ "$answer" == "Y" ]] || [[ "$answer" == "y" ]]; then
+        echo "$BOLD_LETTERS Ok, continuing... $NORMAL_LETTERS"; sleep 2
+        clear
+        choose_package
+    else
+        echo; echo "$BOLD_LETTERS Ok, exiting... $NORMAL_LETTERS"; echo; sleep 2
+    fi
 }
 
 function main() {
 	setup_working_directory
-    install_essential_packages
-    clone_setup_data
-    call_install_scripts
-    copy_systemfiles
+	install_startup_packages
+	clone_setup_data
+	copy_systemfiles
+	install_essential_packages
+	install_common_packages
+    clear; echo "$BOLD_LETTERS
+    We can install some extra packages...
+    $NORMAL_LETTERS"; echo
+    choose_package
 }
 
 main"$@"

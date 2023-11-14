@@ -8,7 +8,7 @@
     <message>Authentication is required to run Nemo File Manager as root...</message>
     <icon_name>nemo</icon_name>
     <defaults>
-      <allow_any>auth_admin</allow_any>
+      <allow_any>yes</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
       <allow_active>yes</allow_active>
     </defaults>

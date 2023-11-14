@@ -8,7 +8,7 @@
     <message>Authentication is required to run Mousepad as root...</message>
     <icon_name>mousepad</icon_name>
     <defaults>
-      <allow_any>no</allow_any>
+      <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
       <allow_active>yes</allow_active>
     </defaults>
