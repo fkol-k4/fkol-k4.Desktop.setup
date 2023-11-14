@@ -85,60 +85,113 @@ function copy_systemfiles(){
 	sync; sleep 1; sync
 }
 
-function install_essential_packages() {
-    # Set variables
-    msgbody="Installing essential packages..."
+function install_apt_package_template() {
+	    # Set variables
+    msgbody="Installing ..."
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
 	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
     array=(
-        axel
-		bluefish
-		bluefish-plugins
+        )
+    sudo apt-get --yes --quiet install ${array[@]}
+    sync; sleep 1; sync
+
+}
+
+function install_deb_package_template() {
+    # Set variables
+    pkgbackupdir="<INSERT APPLICATION NAME>"
+    pkgversion="<LINK TO .deb FILE>"
+    pkgname=`echo "$pkgversion" | awk 'BEGIN { FS = "/" } ; { print $6 }'`	# Adjust accordingly to get .deb package name
+	msgbody="Installing $pkgbackupdir ..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    mkdir -p "$BACKUPDIR/$pkgbackupdir"
+    cd "$BACKUPDIR/$pkgbackupdir/"
+    [[ ! -f "$pkgname" ]] && wget "$pkgversion"
+    sync; sleep 1; sync
+    sudo gdebi --non-interactive "$pkgname"
+    sync; sleep 1; sync
+    mkdir -p "$HOME/.local/share/applications" ; mv "$HOME/Desktop/*.desktop" $HOME/.local/share/applications/
+    cd "$HOME"
+}
+
+function install_essential_packages() {
+    # Set variables
+    msgbody="Installing Linux kernel & modules..."
+    msg="$BOLD_LETTERS
+    $msgbody
+    $NORMAL_LETTERS"
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+		linux-generic
+		linux-headers-generic
+		linux-image-generic
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
+    sudo apt-get --yes --no-install-recommends build-dep linux-generic
+    sync; sleep 1; sync
+    # Set variables
+    msgbody="Installing dev & OS tools..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
 		build-essential
 		cpulimit
-        curl
 		debootstrap
-		default-jre
-		default-mysql-client
-        deluge
 		dialog
 		dkms
 		fakeroot
-		fancontrol
-		foremost
-		gddrescue
-		geany
-		geany-plugins
 		genisoimage
-        git
-		gparted
-		gsmartcontrol
-		hddtemp
-		htop
-		idle
-		idle3
-		iotop
 		kernel-wedge
+		libncurses5 libncurses5-dev libncurses6
+		locate
+		makedumpfile
+		pastebinit
+		preload
+		progress
+		squashfs-tools
+		syslinux
+		tree
+		zenity
+		zram-config zram-tools
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
+    # Set variables
+    msgbody="Installing package management tools..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+		app-install-data
+		apt-file
+		deborphan
+		gdebi
+		synaptic
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
+    # Set variables
+    msgbody="Installing sync & download managing tools..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+        axel
+        curl
+        deluge
+        git
+        rsync
+        zsync
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
+    # Set variables
+    msgbody="Installing compression codecs..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
 		liblz1
 		liblz4-1
 		liblz4-tool
 		liblzf1
 		liblzma5
 		liblzo2-2
-		libncurses5
-		libncurses5-dev
-		libncurses6
-		linux-generic
-		linux-headers-generic
-		linux-image-generic
-		lm-sensors
-		locate
-		lshw
-		lshw-gtk
-		lsof
-		lsscsi
 		lz4
 		lz4json
 		lzd
@@ -147,55 +200,110 @@ function install_essential_packages() {
 		lzma
 		lzma-alone
 		lzop
-		makedumpfile
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
+    # Set variables
+    msgbody="Installing text & code editors..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+		bluefish bluefish-plugins
+		geany
+		geany-plugins
+		idle idle3
 		mc
 		meld
 		mousepad
 		nano
-		pastebinit
 		poedit
 		potool
-		preload
-		progress
-        rsync
-		squashfs-tools
-		syslinux
-		testdisk
 		translate-toolkit
-		tree
-		vim
-		vim-python-jedi
-		zenity
-		zram-config
-		zram-tools
-        zsync
+		vim vim-python-jedi
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
+    # Set variables
+    msgbody="Installing system & storage control tools..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+		fancontrol
+		foremost
+		gddrescue
+		gparted
+		gsmartcontrol
+		hddtemp
+		htop
+		iotop
+		lm-sensors
+		lshw
+		lshw-gtk
+		lsof
+		lsscsi
+		testdisk
         )
     sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     sync; sleep 1; sync
-    # Enable sensors
-    sudo sensors-detect --auto
+    sudo sensors-detect --auto	# Enable sensors
     # Old command for sensors detecting
     #yes | sudo sensors-detect
+    # Set variables
+    msgbody="Installing Java & SQL clients..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+		default-jre
+		default-mysql-client
+        )
+    sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
 }
 
 function install_common_packages() {
     # Set variables
-    msgbody="Installing common packages..."
+    msgbody="Installing web-related packages & tools..."
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
 	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
-    # Begin installation
     array=(
-		aspell aspell-el aspell-en aspell-fr
+		deluge
+		firefox
+		irssi
+		keepassx
+		links2 lynx
+		pidgin pidgin-plugin-pack pidgin-themes
+		thunderbird
+		wireshark
+        )
+    sudo apt-get --yes --quiet install ${array[@]}
+    sync; sleep 1; sync
+    # Set variables
+    msgbody="Installing media packages & tools..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
 		audacity
 		blender
 		brasero
-		catfish
 		clementine
+		frei0r-plugins
+		gimp gimp-data-extras
+		handbrake
+		inkscape
+		kdenlive
+		mkvtoolnix mkvtoolnix-gui
+		mp3check mp3diags
+		mpv
+		pulseaudio pavucontrol
+		quodlibet quodlibet-plugins
+		rhythmbox rhythmbox-plugins
+		transcode
+		vlc
+        )
+    sudo apt-get --yes --quiet install ${array[@]}
+    sync; sleep 1; sync
+    # Set variables
+    msgbody="Installing Office & font tools..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+		aspell aspell-el aspell-en aspell-fr
+		catfish
 		cups-pdf
-		deluge
-		firefox
 		fontforge fontforge-extras
 		font-manager
 		fonts-dejavu fonts-dejavu-extra
@@ -203,33 +311,19 @@ function install_common_packages() {
 		fonts-gfs-*
 		fonts-liberation*
 		fonts-noto fonts-noto-extra
-		frei0r-plugins
-		gimp gimp-data-extras
 		gucharmap
-		handbrake
-		inkscape
-		irssi
-		kdenlive
-		keepassx
 		libreoffice libreoffice-pdfimport libreoffice-templates
-		links2
-		lynx
-		mkvtoolnix mkvtoolnix-gui
-		mp3check
-		mp3diags
-		mpv
 		myspell-el-gr
-		pidgin pidgin-plugin-pack pidgin-themes
-		pulseaudio pavucontrol
-		quodlibet quodlibet-plugins
-		rhythmbox rhythmbox-plugins
-		rpi-imager
 		seahorse
-		thunderbird
-		transcode
-		vlc
-		wireshark
-    )
+        )
+    sudo apt-get --yes --quiet install ${array[@]}
+    sync; sleep 1; sync
+    # Set variables
+    msgbody="Installing Raspberry Pi imager..."
+	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+    array=(
+		rpi-imager
+        )
     sudo apt-get --yes --quiet install ${array[@]}
     sync; sleep 1; sync
 }
@@ -377,6 +471,7 @@ function install_plank_dock() {
 		plank
 		)
 	sudo apt-get --yes --quiet install ${array[@]}
+	cp /usr/share/applications/plank.desktop $HOME.config/autostart/
 	sync; sleep 1; sync
     cd "$HOME"
 }
