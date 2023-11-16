@@ -23,9 +23,10 @@
 #	Global variables & command aliases
 BOLD_LETTERS=$(tput bold)
 NORMAL_LETTERS=$(tput sgr0)
-WORKING_DIR="/tmp/SetupDirectory"
+WORKING_DIR="/tmp/SetupDirectory/"
 GIT_REPO="https://github.com/fkol-k4/fkol-k4_Desktop_setup.git"
-REPO_DIR=`echo "$GIT_REPO" | awk -F'[/.]' '{print $6}'`
+REPO_DIR="fkol-k4_Desktop_setup/"
+SYSTEMFILES_DIR="linux_mint_22.1_Victoria/SystemFiles/"
 
 #   Create deb packages backup directory
 cd "$HOME"
@@ -50,7 +51,7 @@ function install_startup_packages(){
 	sudo apt-get --yes --quiet install git rsync notification-daemon gdebi
 	sync; sleep 1; sync
 	msgbody="OK! All essential packages have been installed. Continuing..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
 }
 
 function clone_setup_data(){
@@ -61,27 +62,29 @@ function clone_setup_data(){
 	$NORMAL_LETTERS"
     clear
     cd "$WORKING_DIR"/
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
 	# Cloning installation data
     git clone "$GIT_REPO"
     sync; sleep 1; sync
 	msgbody="OK! Installation data have been cloned. Continuing..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
 }
 
 function copy_systemfiles(){
 	# Copying System Files from Git repo to System
-	filesdir="linux_mint_22.1_Victoria/SystemFiles"
 	msgbody="Copying System Files from Git repo to System, please wait..."
 	msg="$BOLD_LETTERS
 	$msgbody
 	$NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
-	sudo rsync -avz "$WORKING_DIR/$REPO_DIR/$filesdir/" /
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
+	cd $WORKING_DIR
+	cd fkol-k4_Desktop_setup/linuxMint_22.1_Victoria/
+	sudo rsync -av SystemFiles/ /
 	sync; sleep 1; sync
 	sudo update-grub
+	sudo fc-cache -fv
 	msgbody="Files from Git repo have being copied to System. Continuing setup..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
 	sync; sleep 1; sync
 }
 
@@ -91,7 +94,7 @@ function install_apt_package_template() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
         )
     sudo apt-get --yes --quiet install ${array[@]}
@@ -108,7 +111,7 @@ function install_deb_package_template() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     mkdir -p "$BACKUPDIR/$pkgbackupdir"
     cd "$BACKUPDIR/$pkgbackupdir/"
     [[ ! -f "$pkgname" ]] && wget "$pkgversion"
@@ -125,7 +128,7 @@ function install_essential_packages() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		linux-generic
 		linux-headers-generic
@@ -136,7 +139,7 @@ function install_essential_packages() {
     sync; sleep 1; sync
     # Set variables
     msgbody="Installing dev & OS tools..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		build-essential
 		cpulimit
@@ -161,7 +164,7 @@ function install_essential_packages() {
     sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     # Set variables
     msgbody="Installing package management tools..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		app-install-data
 		apt-file
@@ -172,7 +175,7 @@ function install_essential_packages() {
     sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     # Set variables
     msgbody="Installing sync & download managing tools..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
         axel
         curl
@@ -184,7 +187,7 @@ function install_essential_packages() {
     sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     # Set variables
     msgbody="Installing compression codecs..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		liblz1
 		liblz4-1
@@ -204,7 +207,7 @@ function install_essential_packages() {
     sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     # Set variables
     msgbody="Installing text & code editors..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		bluefish bluefish-plugins
 		geany
@@ -222,7 +225,7 @@ function install_essential_packages() {
     sudo apt-get --yes --quiet install --no-install-recommends ${array[@]}
     # Set variables
     msgbody="Installing system & storage control tools..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		fancontrol
 		foremost
@@ -246,7 +249,7 @@ function install_essential_packages() {
     #yes | sudo sensors-detect
     # Set variables
     msgbody="Installing Java & SQL clients..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		default-jre
 		default-mysql-client
@@ -260,7 +263,7 @@ function install_common_packages() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		deluge
 		firefox
@@ -275,7 +278,7 @@ function install_common_packages() {
     sync; sleep 1; sync
     # Set variables
     msgbody="Installing media packages & tools..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		audacity
 		blender
@@ -299,7 +302,7 @@ function install_common_packages() {
     sync; sleep 1; sync
     # Set variables
     msgbody="Installing Office & font tools..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		aspell aspell-el aspell-en aspell-fr
 		catfish
@@ -320,7 +323,7 @@ function install_common_packages() {
     sync; sleep 1; sync
     # Set variables
     msgbody="Installing Raspberry Pi imager..."
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     array=(
 		rpi-imager
         )
@@ -337,7 +340,7 @@ function install_stremio() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     mkdir -p "$BACKUPDIR/$pkgbackupdir"
     cd "$BACKUPDIR/$pkgbackupdir/"
     [[ ! -f "$pkgname" ]] && wget "$pkgversion"
@@ -357,7 +360,7 @@ function install_freetube() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     mkdir -p "$BACKUPDIR/$pkgbackupdir"
     cd "$BACKUPDIR/$pkgbackupdir/"
     [[ ! -f "$pkgname" ]] && wget "$pkgversion"
@@ -379,7 +382,7 @@ function install_oracle_virtualbox() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     mkdir -p "$BACKUPDIR/$pkgbackupdir"
     cd "$BACKUPDIR/$pkgbackupdir/"
     [[ ! -f "$pkgname" ]] && wget "$pkgversion"
@@ -405,7 +408,7 @@ function install_VariCAD() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     # Install packages
     mkdir -p "$BACKUPDIR/$pkgbackupdir"
     cd "$BACKUPDIR/$pkgbackupdir/"
@@ -428,7 +431,7 @@ function install_remarkable_editor() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     mkdir -p "$BACKUPDIR/$pkgbackupdir"
     cd "$BACKUPDIR/$pkgbackupdir/"
     [[ ! -f "$pkgname" ]] && wget "$pkgversion"
@@ -448,7 +451,7 @@ function install_haroopad_editor() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     mkdir -p "$BACKUPDIR/$pkgbackupdir"
     cd "$BACKUPDIR/$pkgbackupdir/"
     [[ ! -f "$pkgname" ]] && wget "$pkgversion"
@@ -465,7 +468,7 @@ function install_plank_dock() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
     # Begin installation
     array=(
 		plank
@@ -482,7 +485,7 @@ function add_nopasswd_option() {
     msg="$BOLD_LETTERS
     $msgbody
     $NORMAL_LETTERS"
-	echo "$msg"; notify-send-t 4000 "$msgbody"; sleep 2
+	echo "$msg"; notify-send -t 4000 "$msgbody"; sleep 2
 	txtbody="
 # 	NOPASSWD option for sudo use, added by $USER
 $USER ALL=(ALL) NOPASSWD: ALL
